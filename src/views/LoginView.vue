@@ -91,7 +91,6 @@ const submitForm = async () => {
       const { token, user, userPermissionId, userPermissionName } = loginUser.data.data;
       const { userId, role, username, roleName } = user;
       const permissionStore = userPermissionsStore();
-      const notificationStore = notification();
       permissionStore.setUserId(userId);
       permissionStore.setUserRole(role);
       permissionStore.setUserName(username);

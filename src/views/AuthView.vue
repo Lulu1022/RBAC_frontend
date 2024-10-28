@@ -79,6 +79,7 @@
 import { nextTick, reactive, ref } from 'vue'
 import { useInitForm, useInitTable } from '../composables/useCommon'
 import { fetchAllRoles, addRole, deleteRole, getRole, updateRole } from '../api/role';
+import { getPermissionByUserid } from '../api/user';
 import { getTreeleftnodes, getAllPermissions, assignPermission, getMenuPermissions, getPermissionsByRole, deletePermissionsByRole } from '../api/permission'
 import { ElTree, ElMessage } from 'element-plus'
 import { userPermissionsStore } from '../stores/userPermissions'
@@ -146,7 +147,6 @@ const submitRole = async () => {
       if (isCreate.value == true) {
         try {
           await addRole(formRole)
-
           ElMessage({
             message: '新增角色成功',
             type: 'success',
@@ -163,8 +163,6 @@ const submitRole = async () => {
       }
       else {
         try {
-          console.log("編輯角色")
-
           updateRole(editId.value, formRole)
           getDataList()
 
@@ -225,9 +223,8 @@ const editRole = async (id) => {
 //抽屜中 tree menu 資料
 const fetchOriginalData = async () => {
   try {
-    const res = await getMenuPermissions()
-    transformedData.value = res.data.data
-    console.log("抽屜 tree menu: ", transformedData.value)
+    const res = await getMenuPermissions();
+    transformedData.value = res.data.data;
   } catch (error) {
     console.error('Error fetching original data:', error);
   }
@@ -237,15 +234,13 @@ fetchOriginalData()
 //預設勾選權限
 const handleSet = async (id) => {
   userPermission.value = [];
-  console.log("正在設定角色: ", id);
-  editId.value = id
+  editId.value = id;
   try {
     const res = await getTreeleftnodes(id);
     const checkedNodes = res.data.data
 
     var checkedId = []
     checkedNodes.map(item => checkedId.push(item.permissionId))
-    console.log("該使用者擁有的權限 value: ", checkedId);
 
     drawerEdit.value = true;
     await nextTick()
@@ -259,33 +254,37 @@ const handleSet = async (id) => {
 
 //更改權限
 const submitPermission = async (id) => {
-
   const fullCheckedId = treeRef.value.getCheckedKeys()
   const halfCheckedId = treeRef.value.getHalfCheckedKeys()
   checkedPermissionId.value = [...fullCheckedId, ...halfCheckedId]
-  console.log("更改的權限 ID: ", checkedPermissionId.value)
 
   const fullCheckedName = treeRef.value.getCheckedNodes()
   const halfCheckedName = treeRef.value.getHalfCheckedNodes()
   checkedPermissionName.value = [...fullCheckedName, ...halfCheckedName].map(item => item.label)
-  console.log("更改的權限 ID: ", checkedPermissionName.value)
 
-  //呼叫刪除 api
+  // 刪除 api
   await deletePermissionsByRole(editId.value)
+  // 賦予角色權限 api
   await assignPermission(editId.value, checkedPermissionId.value)
+
+  // 取新權限 api
+  const userID = permissinStore.userId;
+  const res = await getPermissionByUserid(userID);
+  const permissionNames = res.data.data
+      .map(item => item.permissionName) // 提取 permissionName
+      .filter(name => name !== null && name !== undefined); // 過濾掉 null 或 undefined 值
+  const permissionIds = res.data.data
+      .map(item => item.permissionId) // 提取 permissionId
+      .filter(name => name !== null && name !== undefined); // 過濾掉 null 或 undefined 值
+
+   permissinStore.setUserPermissionsId(permissionIds)
+   permissinStore.setUserPermissionsName(permissionNames)
 
 
   ElMessage({
     message: '設定成功',
     type: 'success',
   });
-  if (permissinStore.userRole == editId.value) {
-    console.log("當前列 id: ", editId.value)
-    console.log("當前 permissinStore.userRole: ", permissinStore.userRole)
-    permissinStore.setUserPermissionsId(checkedPermissionId.value)
-    permissinStore.setUserPermissionsName(checkedPermissionName.value)
-
-  }
 
   drawerEdit.value = false;
 }

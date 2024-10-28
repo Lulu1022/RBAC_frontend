@@ -32,9 +32,7 @@ import { userPermissionsStore } from '../../stores/userPermissions'
 
 // 監聽 permissinStore.userPermissions 的變動
 watch(() => userPermissionsStore().userPermissionsId, async (newValue, oldValue) => {
-  // 在這裡可以添加額外的邏輯，比如檢查變動的內容，然後再呼叫 fetchMenu()
-  console.log('permissinStore.userPermissionsId changed:', newValue);
-  await fetchMenu(); // 確保 fetchMenu 是異步函數
+  await fetchMenu();
 });
 
 const menu = ref([])

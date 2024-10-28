@@ -83,17 +83,15 @@ router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token');
 
   let permissionPaths = [];
-  // 如果有 token 且權限列表還沒獲取，就從 API 獲取該使用者的權限
+  // 如果有 token
   if (token) {
     try {
       const userId = store.userId;
       const response = await getPermissionPathByUserid(userId);
       const permissions = response.data.data;
-      // 提取 permissionPath 並存入一個陣列
-      permissionPaths = permissions.filter(p => p && p.path).map(p => p.path);
 
       // 檢查當前路徑是否包含在權限路徑中
-      if (!permissionPaths.includes(to.path)) {
+      if (!permissions.includes(to.path)) {
         // 如果沒有權限，跳轉到權限不足的頁面
         return next('/no-access');
       } else {
