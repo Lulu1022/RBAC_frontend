@@ -39,6 +39,9 @@ export const userPermissionsStore = defineStore('userPermissions', () => {
     roleName.value = role;
   }
 
+  const hasPermissionByName = (permissionName) => {
+    return userPermissionsName.value.includes(permissionName);
+  };
 
   return {
     userPermissionsName,
@@ -52,7 +55,8 @@ export const userPermissionsStore = defineStore('userPermissions', () => {
     setUserId,
     setUserName,
     setUserRole,
-    setRoleName
+    setRoleName,
+    hasPermissionByName
   }
 },{
   persist: true

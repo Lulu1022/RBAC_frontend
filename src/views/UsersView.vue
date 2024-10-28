@@ -18,11 +18,15 @@
                             @change="changeStatus(scope.row)" />
                     </template>
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="操作" v-if="userPermissionsStore().hasPermissionByName('編輯使用者') || userPermissionsStore().hasPermissionByName('刪除使用者')">
                     <template #default="scope">
-                        <el-button size="small" @click="handleEdit(scope.row)">
-                            編輯
-                        </el-button>
+                      <template v-if="userPermissionsStore().hasPermissionByName('編輯使用者')">
+                          <el-button size="small" @click="handleEdit(scope.row)">
+                              編輯
+                          </el-button>
+                      </template>
+
+                    <template v-if="userPermissionsStore().hasPermissionByName('刪除使用者')">
                         <el-popconfirm title="是否確定刪除?" @confirm="handleDelete(scope.row)">
                             <template #reference>
                                 <el-button size="small" type="danger">
@@ -30,6 +34,7 @@
                                 </el-button>
                             </template>
                         </el-popconfirm>
+                    </template>
                     </template>
                 </el-table-column>
             </el-table>
